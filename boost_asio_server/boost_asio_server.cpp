@@ -17,6 +17,7 @@
 #include <thread>
 #include <fstream>
 
+// global constant
 static const std::string DELIM = ";";
 static const int PORT = 12345;
 
@@ -382,4 +383,3 @@ int main (int argc, char* argv[])
 
 	return 0 ;
 }
-
