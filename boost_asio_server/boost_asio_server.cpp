@@ -335,13 +335,11 @@ private:
 	void timer_handler( std::shared_ptr<boost::asio::deadline_timer> timer,
 		const boost::system::error_code& ec )
 	{
-		if(!ec)
-		{
+		if(!ec) {
 			if ( !are_active_sessions() ){
 				#ifdef INFO
 				std::cout << "[Timer]\t\tReached main timer's timeout \n";
 				#endif
-				boost::system::error_code ec;
 				close_server();
 			}else{
 				// still an active sesion
@@ -351,7 +349,7 @@ private:
 				timer->expires_from_now(TIMEOUT);
 				timer->async_wait( std::bind(&Server::timer_handler, this, timer, ec) );
 			}
-		}else if( ec == boost::asio::error::operation_aborted ){
+		} else if( ec == boost::asio::error::operation_aborted ) {
 			#ifdef INFO
 			std::cout << "[Timer]\t\tOperation canceled: " << ec.message() << "\n";
 			#endif
@@ -384,6 +382,8 @@ private:
 			auto wait_connection_timer = get_server_timeout_timer();
 			// create the shared_ptr of ClientSession
 			// Not an unique_ptr as the manager is first emplaced then the handler used for the bind
+			// https://stackoverflow.com/questions/14484183/what-is-the-correct-usage-of-stdunique-ptr-while-pushing-into-stdvector
+			// could be used as unique_ptr in C++17: A &element = vec.emplace_back();
 			// c++11: std::shared_ptr<ClientSession> new_cs( new ClientSession( io_service_, shared_resources_) );
 			// c++14
 			auto cs = std::make_shared<ClientSession>( io_service_, shared_resources_ );

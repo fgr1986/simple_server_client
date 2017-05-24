@@ -29,9 +29,22 @@ CC=g++
 # fPIC: Position Independent Code means that the generated machine code
 # is not dependent on being located at a specific address in order to work.
 # CPPFLAGS+= -std=c++11 -Wall -O3 -fPIC -g
+# -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
+# -Wall -Wextra   reasonable and standard
+# -Wshadow   warn the user if a variable declaration shadows one from a parent context
+# -Wnon-virtual-dtor   warn the user if a class with virtual functions has a non-virtual
+# destructor. This helps catch hard to track down memory errors
+# -Wold-style-cast   warn for c-style casts
+# -Wcast-align   warn for potential performance problem casts
+# -Wunused   warn on anything being unused
+# -Woverloaded-virtual   warn if you overload (not override) a virtual function
+# -pedantic
+# -Wconversion   warn on type conversions that may lose data
+# -Wsign-conversion   warn on sign conversions
+# -Wmisleading-indentation   warn if identation implies blocks where blocks do not exist
 
 # fgarcia no fPIC
-CPPFLAGS+= -std=c++14 -Wall -O3 -g
+CPPFLAGS+= -std=c++14 -O3 -g -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 
 #################
 # Library flags #
