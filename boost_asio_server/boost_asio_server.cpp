@@ -335,7 +335,7 @@ private:
 	void timer_handler( std::shared_ptr<boost::asio::deadline_timer> timer,
 		const boost::system::error_code& ec )
 	{
-		if(!ec) {
+		if( !ec ) {
 			if ( !are_active_sessions() ){
 				#ifdef INFO
 				std::cout << "[Timer]\t\tReached main timer's timeout \n";
