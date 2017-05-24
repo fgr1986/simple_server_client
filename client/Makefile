@@ -20,7 +20,7 @@ CC=g++
 # Gcc flags     #
 #################
 #CPPFLAGS+= -Wall -g // Debugg it turns on (almost) all the warnings that g++ can tell you about
-#CPPFLAGS+= -Wall -O3 -fdump-tree-cfg-graph -fdump-rtl-expand-graph  // rtl graphs, O3 
+#CPPFLAGS+= -Wall -O3 -fdump-tree-cfg-graph -fdump-rtl-expand-graph  // rtl graphs, O3
 #CPPFLAGS+= -Wall -O3 -g -fdump-tree-original-raw -fdump-tree-all-all-finstrument-functions // rtl graphs, O3
 #CPPFLAGS+= -std=c++11 -Wall -O3 -I $(MATLAB_ROOT)extern/include // Matlab,c++11
 # CPPFLAGS+= -g -std=c++11 -Wall -O3 -v // verbose
@@ -31,7 +31,7 @@ CC=g++
 # CPPFLAGS+= -std=c++11 -Wall -O3 -fPIC -g
 
 # fgarcia no fPIC
-CPPFLAGS+= -std=c++11 -Wall -O3 -g
+CPPFLAGS+= -std=c++14 -Wall -O3 -g
 
 #################
 # Library flags #
@@ -40,6 +40,7 @@ CPPFLAGS+= -std=c++11 -Wall -O3 -g
 # # fgarcia no shared
 # LDFLAGS= -L/usr/lib -lboost_thread -lboost_regex -lboost_filesystem -lboost_system -shared
 
+# LDFLAGS= -L/usr/lib -lboost_thread -lboost_regex -lboost_filesystem -lboost_system -lpthread
 LDFLAGS= -L/usr/lib -lboost_thread -lboost_regex -lboost_filesystem -lboost_system -lpthread
 
 SRC:= $(wildcard *.cpp)
@@ -68,8 +69,3 @@ clean:
 run: $(EXE)
 	@echo "Running" $(EXE) "..."
 	@./$(EXECDIR)/$< $(EXE_OPTS)
-
-
-
-
-

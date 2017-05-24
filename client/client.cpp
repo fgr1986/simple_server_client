@@ -20,18 +20,15 @@
 
 static const std::string PORT {"12345"};
 static const int U_SEC_SLEEP = 1;
-static const int SERVER_SIZE = 250;
+static const int SERVER_SIZE = 50;
 
 using Asio = boost::asio::ip::tcp;
 class Client {
 	public:
 		/* Constructors and Destructors */
-		Client(int size = SERVER_SIZE) : server_size{size} {
-
-			/* Initialize vectors with randomly assigned ids [1, 250], and
-			* names
-			*/
-
+		Client(int size = SERVER_SIZE) : server_size{size}
+		{
+			// Initialize vectors with randomly assigned ids [1, 250], and names
 			r_ids.reserve(server_size);
 			generate_ids(r_ids);
 
@@ -45,8 +42,6 @@ class Client {
 			std::cout << "\tClient Destructor" << std::endl;
 		};
 
-		/* Variables */
-
 		/* Vector of (id, name) pairs */
 		std::vector<std::pair<int, std::string>> p_insert {};
 	private:
@@ -54,9 +49,6 @@ class Client {
 		void generate_ids(std::vector<int>& id);
 		std::vector<int> r_ids;
 		std::vector<std::string> names {"Alice", "Bob", "Eve", "Mallory"};
-
-
-
 
 };
 
