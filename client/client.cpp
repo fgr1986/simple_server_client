@@ -20,7 +20,7 @@
 
 static const std::string PORT {"12345"};
 static const int U_SEC_SLEEP = 1;
-static const int SERVER_SIZE = 50;
+static const int SERVER_SIZE = 5;
 
 using Asio = boost::asio::ip::tcp;
 class Client {
