@@ -7,11 +7,11 @@
 
 class ClientSession {
 	public:
-		
+
 		~ClientSession();
 		ClientSession(boost::asio::io_service& io_service, SharedResources& shared_resources);
 		boost::asio::ip::tcp::socket& get_socket();
-		int serve_query();
+		void serve_query();
 		void close_socket();
 		bool is_active();
 

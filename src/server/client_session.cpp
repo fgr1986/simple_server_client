@@ -25,7 +25,7 @@ boost::asio::ip::tcp::socket& ClientSession::get_socket()
 	return socket_;
 }
 
-int ClientSession::serve_query()
+void ClientSession::serve_query()
 {
 	// set the session as active
 	set_active();
@@ -83,22 +83,18 @@ int ClientSession::serve_query()
 			write_buffer.consume(bytes_transferred); // Remove data that was written.
 			if (err) {
 				std::cerr << "Status: " << err.message() << "\n";
-				return -1;
 			}
 		} // end of while
 	}
 	catch (std::exception& e)
 	{
 		std::cerr << "Exception in thread: " << e.what() << "\n";
-		return -1;
 	}
 	// set the session dead
 	#ifdef INFO
 	std::cout << "[CSession]\t\t\tClosing thread related to serve_query. Object related to thread: " << this << "\n";
 	#endif
 	set_dead();
-
-	return 0;
 }
 
 void ClientSession::close_socket()

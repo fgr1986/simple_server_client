@@ -98,14 +98,21 @@ void Server::add_client_session( const std::shared_ptr<ClientSession>&& cs )
 	std::lock_guard<std::mutex> g(mut_);
 	client_sessions_.emplace_back( cs );
 }
-void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer,
-	const boost::system::error_code& ec )
+void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer )
 {
 	#ifdef DEBUG
-	std::cout << "[Timer]\t\t\t--> Restarting the timer.\n";
+	std::cout << "[Timer]\t\t\t--> [A] Restarting the timer.\n";
 	#endif
+	timer->cancel();
 	timer->expires_from_now(timeout_);
-	timer->async_wait( std::bind(&Server::timer_handler, this, timer, ec) );
+	// timer->async_wait( std::bind(&Server::timer_handler, this, timer, ec) );
+	timer->async_wait(
+		[this, timer](boost::system::error_code ec){
+			timer_handler( std::move(timer), std::move(ec) );
+	} );
+	#ifdef DEBUG
+	std::cout << "[Timer]\t\t\t--> [B] Restarting the timer.\n";
+	#endif
 }
 
 void Server::timer_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer,
@@ -122,7 +129,7 @@ void Server::timer_handler( const std::shared_ptr<boost::asio::deadline_timer>& 
 			close_server();
 		} else {
 			// still an active sesion
-			restart_handler( timer, ec );
+			restart_handler( timer );
 		}
 	} else if( ec == boost::asio::error::operation_aborted ) {
 		#ifdef INFO
@@ -142,9 +149,7 @@ std::shared_ptr<boost::asio::deadline_timer> Server::get_server_timeout_timer()
 	std::cout << "[Server]\tSetting main timer: \n";
 	#endif
 	auto timer = std::make_shared<boost::asio::deadline_timer>( io_service_);
-	//asign lambda
-	boost::system::error_code ec;
-	restart_handler( timer, ec );
+	restart_handler( timer );
 	return timer;
 }
 
@@ -177,8 +182,7 @@ void Server::server_exec()
 		acceptor_.async_accept(cs->get_socket(),
 			[this, cs, wait_connection_timer](boost::system::error_code ec){
 				handle_session( std::move(cs), std::move(wait_connection_timer), ec );
-				// handle_session( std::move(cs), std::move(wait_connection_timer), ec );
-			});
+		});
 	}
 	catch (std::exception& e)
 	{
@@ -206,7 +210,7 @@ void Server::handle_session( const std::shared_ptr<ClientSession>&& cs ,
 		#ifdef VERBOSE
 		std::cout << "[Server]\tA client has asked us, so cancel the timer" << "\n";
 		#endif
-		restart_handler( timer, ec );
+		restart_handler( timer );
 	}
 	if (!ec) {
 		// timeout, the socket is closed
@@ -221,7 +225,12 @@ void Server::handle_session( const std::shared_ptr<ClientSession>&& cs ,
 			std::cout << "[Server]\tCreating new thread related to ClientSession " << cs << "\n";
 			#endif
 			cs->set_active();
-			std::unique_ptr<std::thread> t( new std::thread( std::bind(&ClientSession::serve_query, cs)) );
+			// std::unique_ptr<std::thread> t( new std::thread(
+			// 	std::bind(&ClientSession::serve_query, cs)) );
+			std::unique_ptr<std::thread> t( new std::thread(
+				[cs](){ cs->serve_query(); }
+			));
+
 			v_thread_.emplace_back( std::move(t) );
 		}
 	} else {

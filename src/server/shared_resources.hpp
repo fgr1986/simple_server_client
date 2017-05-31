@@ -2,8 +2,8 @@
 #define SHARED_RESOURCES_H
 
 // VERBOSE levels
-// #define DEBUG ;
-// #define VERBOSE ;
+#define DEBUG ;
+#define VERBOSE ;
 #define INFO ;
 
 #include <vector>
