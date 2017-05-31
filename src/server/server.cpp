@@ -98,7 +98,7 @@ void Server::add_client_session( const std::shared_ptr<ClientSession>&& cs )
 	std::lock_guard<std::mutex> g(mut_);
 	client_sessions_.emplace_back( cs );
 }
-void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer )
+void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>&& timer )
 {
 	#ifdef DEBUG
 	std::cout << "[Timer]\t\t\t--> [A] Restarting the timer.\n";
@@ -115,8 +115,8 @@ void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>
 	#endif
 }
 
-void Server::timer_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer,
-	const boost::system::error_code& ec )
+void Server::timer_handler( const std::shared_ptr<boost::asio::deadline_timer>&& timer,
+	const boost::system::error_code&& ec )
 {
 	#ifdef DEBUG
 	std::cout << "[Timer]\t\t\t--> Timer_handler: " << ".\n";
@@ -129,7 +129,7 @@ void Server::timer_handler( const std::shared_ptr<boost::asio::deadline_timer>& 
 			close_server();
 		} else {
 			// still an active sesion
-			restart_handler( timer );
+			restart_handler( std::move(timer) );
 		}
 	} else if( ec == boost::asio::error::operation_aborted ) {
 		#ifdef INFO
@@ -149,7 +149,7 @@ std::shared_ptr<boost::asio::deadline_timer> Server::get_server_timeout_timer()
 	std::cout << "[Server]\tSetting main timer: \n";
 	#endif
 	auto timer = std::make_shared<boost::asio::deadline_timer>( io_service_);
-	restart_handler( timer );
+	restart_handler( std::move(timer) );
 	return timer;
 }
 
@@ -179,6 +179,7 @@ void Server::server_exec()
 		// modern style
 		// lambda capture this, and smart pointers by ref
 		// cs by ref? no, by copy so the pointer destructor is not called
+		// then moved
 		acceptor_.async_accept(cs->get_socket(),
 			[this, cs, wait_connection_timer](boost::system::error_code ec){
 				handle_session( std::move(cs), std::move(wait_connection_timer), ec );
@@ -210,7 +211,7 @@ void Server::handle_session( const std::shared_ptr<ClientSession>&& cs ,
 		#ifdef VERBOSE
 		std::cout << "[Server]\tA client has asked us, so cancel the timer" << "\n";
 		#endif
-		restart_handler( timer );
+		restart_handler( std::move(timer) );
 	}
 	if (!ec) {
 		// timeout, the socket is closed
@@ -225,8 +226,8 @@ void Server::handle_session( const std::shared_ptr<ClientSession>&& cs ,
 			std::cout << "[Server]\tCreating new thread related to ClientSession " << cs << "\n";
 			#endif
 			cs->set_active();
-			// std::unique_ptr<std::thread> t( new std::thread(
-			// 	std::bind(&ClientSession::serve_query, cs)) );
+			// cs captured by value as it is an unique pointer and the movement
+			// would destroy the previous handler
 			std::unique_ptr<std::thread> t( new std::thread(
 				[cs](){ cs->serve_query(); }
 			));

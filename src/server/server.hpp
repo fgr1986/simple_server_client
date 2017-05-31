@@ -45,9 +45,9 @@ private:
 	bool are_active_sessions();
 	void add_client_session( const std::shared_ptr<ClientSession>&& cs );
 
-	void restart_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer );
-	void timer_handler( const std::shared_ptr<boost::asio::deadline_timer>& timer,
-		const boost::system::error_code& ec );
+	void restart_handler( const std::shared_ptr<boost::asio::deadline_timer>&& timer );
+	void timer_handler( const std::shared_ptr<boost::asio::deadline_timer>&& timer,
+		const boost::system::error_code&& ec );
 	std::shared_ptr<boost::asio::deadline_timer> get_server_timeout_timer();
 	void server_exec (void);
 	void handle_session( const std::shared_ptr<ClientSession>&& cs ,
