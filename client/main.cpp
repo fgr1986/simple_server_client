@@ -29,6 +29,9 @@ int main (int argc, char* argv[])
 
 		Client client{};
 
+    if (client.connect()) {
+			client.send();
+		}
 
 
 

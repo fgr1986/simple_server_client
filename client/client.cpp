@@ -16,6 +16,12 @@ static const int U_SEC_SLEEP = 1;
 static const int SERVER_SIZE = 5;
 
 
+/*
+ * Constructor para clientes:
+ * @param size:  número de identificadores a guardar en el servido (tamaño de la tabla en el servidor)
+ * @param port:  puerto de habilitado en el servidor
+ * @param ip_addr: dirección IP del servidor
+ */
 Client::Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip_addr = IP_ADDR) : server_size{size} ,  port{port_n}, ip{ip_addr}
 {
 	// Initialize vectors with randomly assigned ids [1, 250], and names
@@ -28,6 +34,11 @@ Client::Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip
 }
 
 
+/*
+ * generate_ids
+ * Crea un vector de identificadores únicos y aleatoriamente ordenados
+ * @param id: vector en el que se guardan los identificadores generados
+ */
 void Client::generate_ids(std::vector<int>& id)
 {
 	for (auto i = 1 ; i <= SERVER_SIZE; ++i) {
@@ -41,6 +52,10 @@ void Client::generate_ids(std::vector<int>& id)
 }
 
 
+/*
+ * connect
+ * Prepara el socket y establece una conexión con el servidor
+ */
 Client::connect()
 {
 	/* Prepare socket for connection to server */
@@ -68,13 +83,16 @@ Client::connect()
 		}
 }
 
+
+
 Client::send()
 {
+
 	boost::asio::streambuf read_buffer;
 	boost::asio::streambuf write_buffer;
 
 	boost::system::error_code err;
-	for (const auto& i : client.p_insert) {
+	for (const auto& i : p_insert) {
 		std::cout << "sending element: " << std::to_string(i.first) << std::endl;
 
 		/* Write to server. */
