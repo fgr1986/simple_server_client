@@ -1,14 +1,18 @@
 #include <vector>
+#include <string>
+#include <chrono>
 
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
 
 class Client {
 public:
   Client(int size, std::string port_n, std::string ip_addr);
 
-  std::std::vector<std::pair<int, std::string>> p_insert {};
-  int connect();
-  int send();
-  int receive();
+  std::vector<std::pair<int, std::string>> p_insert {};
+  int connect(void);
+  int send(void);
+  int receive(void);
 
 
 private:
@@ -21,4 +25,4 @@ private:
   void generate_ids(std::vector<int>& id);
   std::chrono::duration<double, std::milli> t_lapse;
 
-}
+};

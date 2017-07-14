@@ -9,11 +9,24 @@
 
 
 #include "client.hpp"
+#include <iostream>
+#include <random>
+#include <algorithm>
+#include <thread>
 
 static const std::string PORT {"12345"};
 static const std::string IP_ADDR {"localhost"};
 static const int U_SEC_SLEEP = 1;
 static const int SERVER_SIZE = 5;
+
+
+using Asio = boost::asio::ip::tcp;
+
+std::string make_string(boost::asio::streambuf& streambuf)
+{
+	return {boost::asio::buffers_begin(streambuf.data()),
+		boost::asio::buffers_end(streambuf.data())};
+}
 
 
 /*
@@ -29,7 +42,8 @@ Client::Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip
 	generate_ids(r_ids);
 
 	for (std::vector<int>::size_type i = 0 ; i < r_ids.size(); ++i ) {
-		p_insert.emplace_back(std::make_pair(r_ids[i],names[i % names.size()]));
+		p_insert.emplace_back(std::make_pair(r_ids[i],
+						     names[i % names.size()]));
 	}
 }
 
@@ -56,7 +70,7 @@ void Client::generate_ids(std::vector<int>& id)
  * connect
  * Prepara el socket y establece una conexión con el servidor
  */
-Client::connect()
+int Client::connect(void)
 {
 	/* Prepare socket for connection to server */
 	boost::asio::io_service io_service;
@@ -67,26 +81,29 @@ Client::connect()
  	 * Otherwise use localhost*/
 	 Asio::tcp::resolver::query query(port);
 
-	 Asio::tcp::resolver::iterator endpoint_iterator =	resolver.resolve(query);
+	 Asio::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+
+	 boost::system::error_code ec;
 
 	 Asio::tcp::socket socket(io_service);
 	 /* Connect to the server */
-	 auto res = boost::asio::connect(socket, endpoint_iterator);
+	 boost::asio::connect(socket, endpoint_iterator, ec);
 
-	 std::cout << "mete aquí un check connection" << std::endl;
-	 // TODO quizas es mejor usar un oveload de connect que tiene error code como argumento y revisar la conexion con eso
-	 if (res == std::end()) { // Boost asio connect return type is "end iterator" if connection fails http://charette.no-ip.com:81/programming/doxygen/boost/group__connect.html
-	 			return -1;
-		}
-		else {
-			return 0;
-		}
+	 if (ec == boost::asio::error::not_found) {
+		 return 0;
+
+	 }
+	 else {
+		 std::cerr << "An Error occurred when connecting to the server: " + ec.message() << std::endl;
+		 return -1;
+	 }
 }
 
 
 
-Client::send()
+int Client::send(void)
 {
+	int res;
 
 	boost::asio::streambuf read_buffer;
 	boost::asio::streambuf write_buffer;
@@ -150,5 +167,7 @@ Client::send()
 		std::this_thread::sleep_for(std::chrono::seconds(U_SEC_SLEEP));
 	}
 	std::cout << "Every user sent" << std::endl;
+
+	return res;
 
 }
