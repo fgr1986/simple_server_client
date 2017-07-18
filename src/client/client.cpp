@@ -23,6 +23,10 @@ std::string make_string(boost::asio::streambuf& streambuf)
 		boost::asio::buffers_end(streambuf.data())};
 }
 
+template <typename T>
+constexpr bool is_lvalue(T&&) {
+	  return std::is_lvalue_reference<T>{};
+}
 
 /*
  * Constructor para clientes:
