@@ -14,11 +14,6 @@
 #include <algorithm>
 #include <thread>
 
-static const std::string PORT {"12345"};
-static const std::string IP_ADDR {"localhost"};
-static const int U_SEC_SLEEP = 1;
-static const int SERVER_SIZE = 5;
-
 
 using Asio = boost::asio::ip::tcp;
 
@@ -35,7 +30,7 @@ std::string make_string(boost::asio::streambuf& streambuf)
  * @param port:  puerto de habilitado en el servidor
  * @param ip_addr: dirección IP del servidor
  */
-Client::Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip_addr = IP_ADDR) : server_size{size} ,  port{port_n}, ip{ip_addr}
+Client::Client(int size, std::string port_n, std::string ip_addr) : server_size{size} ,  port{port_n}, ip{ip_addr}
 {
 	// Initialize vectors with randomly assigned ids [1, 250], and names
 	r_ids.reserve(server_size);
@@ -47,6 +42,16 @@ Client::Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip
 	}
 }
 
+/*
+ * Desctructor para clientes:
+ * Hay que liberar la memoria usada por current_socket
+ */
+Client::~Client(void)
+{
+	if(current_socket != nullptr) {
+		delete current_socket;
+	}
+}
 
 /*
  * generate_ids
@@ -85,9 +90,10 @@ int Client::connect(void)
 
 	 boost::system::error_code ec;
 
-	 Asio::tcp::socket socket(io_service);
+	 current_socket =  new Asio::tcp::socket(io_service);
+
 	 /* Connect to the server */
-	 boost::asio::connect(socket, endpoint_iterator, ec);
+	 boost::asio::connect(*current_socket, endpoint_iterator, ec);
 
 	 if (ec == boost::asio::error::not_found) {
 		 return 0;
@@ -103,7 +109,7 @@ int Client::connect(void)
 
 int Client::send(void)
 {
-	int res;
+	int res = 0;
 
 	boost::asio::streambuf read_buffer;
 	boost::asio::streambuf write_buffer;
@@ -124,14 +130,14 @@ int Client::send(void)
 		 * +----------------+-------------------------------------------+
 		 */
 		std::cout << "Writing: " << make_string(write_buffer) << std::endl;
-		auto bytes_transferred = boost::asio::write(socket, write_buffer, err);
+		auto bytes_transferred = boost::asio::write(*current_socket, write_buffer, err);
 		std::cout << "element sent: bytes:" << bytes_transferred << std::endl;
 		write_buffer.consume(bytes_transferred); // Remove data that was written.
 		auto ts = std::chrono::high_resolution_clock::now();
 
 		std::cout << "reading from server..." << std::endl;
 		/* We only read 1 char, 0 for OK, 1 for NOK */
-		bytes_transferred = boost::asio::read(socket, read_buffer,
+		bytes_transferred = boost::asio::read(*current_socket, read_buffer,
 				boost::asio::transfer_exactly(sizeof(char)));
 
 		/* read to int */
@@ -151,11 +157,13 @@ int Client::send(void)
 
 		if (err == boost::asio::error::eof) {
 			std::cout << "Connection closed by server: " << resp << std::endl;
+			res = -1;
 			break; /* Connection closed by server */
 		}
 		else if (err) {
 			std::cerr << "Error: " << err << std::endl;
 			throw boost::system::system_error(err);
+			res = -1;
 		}
 
 		t_lapse = te - ts;

@@ -5,9 +5,18 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
+using Asio = boost::asio::ip::tcp;
+
+static const std::string PORT {"12345"};
+static const std::string IP_ADDR {"localhost"};
+static const int U_SEC_SLEEP = 1;
+static const int SERVER_SIZE = 5;
+
+
 class Client {
 public:
-  Client(int size, std::string port_n, std::string ip_addr);
+  Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip_addr = IP_ADDR);
+  ~Client(void);
 
   std::vector<std::pair<int, std::string>> p_insert {};
   int connect(void);
@@ -19,10 +28,15 @@ private:
   int server_size;
   std::vector<int> r_ids;
   std::vector<std::string> names {"Alice", "Bob", "Eve", "Mallory"};
+  Asio::tcp::socket *current_socket;
 
   std::string port;
   std::string ip;
   void generate_ids(std::vector<int>& id);
   std::chrono::duration<double, std::milli> t_lapse;
+
+
+
+
 
 };
