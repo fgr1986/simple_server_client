@@ -24,7 +24,8 @@ std::string make_string(boost::asio::streambuf& streambuf)
 }
 
 template <typename T>
-constexpr bool is_lvalue(T&&) {
+constexpr bool is_lvalue(T&&)
+{
 	  return std::is_lvalue_reference<T>{};
 }
 
@@ -87,32 +88,36 @@ int Client::connect(void)
 	Asio::tcp::resolver resolver(io_service);
 
 	/* If a specific server IP has been given as input, use that.
- 	 * Otherwise use localhost*/
-	 Asio::tcp::resolver::query query(port);
+	 * Otherwise use localhost*/
+	Asio::tcp::resolver::query query(port);
 
-	 Asio::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+	Asio::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-	 boost::system::error_code ec;
+	boost::system::error_code ec;
 
-	 current_socket =  new Asio::tcp::socket(io_service);
+	current_socket =  new Asio::tcp::socket(io_service);
 
-	 /* Connect to the server */
-	 boost::asio::connect(*current_socket, endpoint_iterator, ec);
+	/* Connect to the server */
+	boost::asio::connect(*current_socket, endpoint_iterator, ec);
 
-	 if (ec == boost::asio::error::not_found) {
-		 return 0;
-
-	 }
-	 else {
-		 std::cerr << "An Error occurred when connecting to the server: " + ec.message() << std::endl;
-		 return -1;
-	 }
+	if (ec == boost::asio::error::not_found) {
+		return 0;
+	}
+	else {
+		std::cerr << "An Error occurred when connecting to the server: " + ec.message() << std::endl;
+		return -1;
+	}
 }
 
 
 
 int Client::send(void)
 {
+	if (current_socket == nullptr) {
+		std::cerr << "current_socket == nullptr. Invalid socket" <<
+			std::endl;
+		return -1;
+	}
 	int res = 0;
 
 	boost::asio::streambuf read_buffer;
