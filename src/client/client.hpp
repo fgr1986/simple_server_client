@@ -32,7 +32,7 @@ private:
 
   std::string port;
   std::string ip;
-  void generate_ids(std::vector<int>& id);
+  void generate_ids(std::vector<int>& id) noexcept;
   std::chrono::duration<double, std::milli> t_lapse;
 
 

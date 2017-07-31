@@ -24,7 +24,7 @@ std::string make_string(boost::asio::streambuf& streambuf)
 }
 
 template <typename T>
-constexpr bool is_lvalue(T&&)
+constexpr bool is_lvalue(T&&) noexcept
 {
 	  return std::is_lvalue_reference<T>{};
 }
@@ -52,9 +52,11 @@ Client::Client(int size, std::string port_n, std::string ip_addr) : server_size{
  * Crea un vector de identificadores únicos y aleatoriamente ordenados
  * @param id: vector en el que se guardan los identificadores generados
  */
-void Client::generate_ids(std::vector<int>& id)
+void Client::generate_ids(std::vector<int>& id) noexcept
 {
-	for (auto i = 1 ; i <= SERVER_SIZE; ++i) {
+	auto cap = id.capacity();
+
+	for (size_t i = 1 ; i <= cap; ++i) {
 		id.emplace_back(i);
 	}
 	auto engine = std::default_random_engine();
