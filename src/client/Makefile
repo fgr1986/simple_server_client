@@ -59,7 +59,7 @@ LDFLAGS= -L/usr/lib -lboost_thread -lboost_regex -lboost_filesystem -lboost_syst
 SRC:= $(wildcard *.cpp)
 OBJECTS= $(SRC:.cpp=.o)
 EXECUTABLE=client
-EXECDIR=../bin/
+EXECDIR=../../bin/
 IDIR=../include
 
 all: ${EXECUTABLE}
