@@ -48,17 +48,6 @@ Client::Client(int size, std::string port_n, std::string ip_addr) : server_size{
 }
 
 /*
- * Desctructor para clientes:
- * Hay que liberar la memoria usada por current_socket
- */
-Client::~Client(void)
-{
-	if(current_socket != nullptr) {
-		delete current_socket;
-	}
-}
-
-/*
  * generate_ids
  * Crea un vector de identificadores únicos y aleatoriamente ordenados
  * @param id: vector en el que se guardan los identificadores generados
@@ -95,7 +84,7 @@ int Client::connect(void)
 
 	boost::system::error_code ec;
 
-	current_socket =  new Asio::tcp::socket(io_service);
+	current_socket.reset(new Asio::tcp::socket(io_service));
 
 	/* Connect to the server */
 	boost::asio::connect(*current_socket, endpoint_iterator, ec);

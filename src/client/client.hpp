@@ -16,7 +16,7 @@ static const int SERVER_SIZE = 5;
 class Client {
 public:
   Client(int size = SERVER_SIZE, std::string port_n = PORT, std::string ip_addr = IP_ADDR);
-  ~Client(void);
+
 
   std::vector<std::pair<int, std::string>> p_insert {};
   int connect(void);
@@ -28,7 +28,7 @@ private:
   int server_size;
   std::vector<int> r_ids;
   std::vector<std::string> names {"Alice", "Bob", "Eve", "Mallory"};
-  Asio::tcp::socket *current_socket;
+  std::unique_ptr<Asio::tcp::socket> current_socket;
 
   std::string port;
   std::string ip;
