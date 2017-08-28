@@ -95,7 +95,7 @@ void Server::add_client_session( const std::shared_ptr<ClientSession>&& cs )
 	#endif
 	// prefer std::lock_guard to ensure the lock is released if the execution
 	// throws any kind of exception
-	std::lock_guard<std::mutex> g(mut_);
+	std::lock_guard<std::mutex> g(mut_client_sessions_, std::adopt_lock);
 	client_sessions_.emplace_back( cs );
 }
 void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>&& timer )

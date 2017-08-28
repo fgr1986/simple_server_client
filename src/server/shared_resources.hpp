@@ -25,7 +25,7 @@ public:
 
 private:
 
-	std::mutex mut_;
+	std::mutex mut_logged_clients_;
 	CInfo logged_clients_;
 
 };
