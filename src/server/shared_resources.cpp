@@ -12,7 +12,12 @@ char SharedResources::check_and_add_logged_clients(const std::pair<int, std::str
 	#ifdef DEBUG
 	std::cout << "[SharedResources]\t\tlock\n";
 	#endif
-	{ // prefer std::lock_guard to ensure the lock is released if the execution
+	{
+		// 1) if different mutex could be blocked from outside threads leading to
+		// a deadlock, use:
+		// 'std::lock( mut_logged_clients_, m2, m3, ...)'
+		//
+		// 2) prefer 'std::lock_guard' to ensure the lock is released if the execution
 		// throws any kind of exception
 		std::lock_guard<std::mutex> g(mut_logged_clients_, std::adopt_lock);
 		// Check if ID is in use
