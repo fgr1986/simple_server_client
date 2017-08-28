@@ -37,7 +37,8 @@ private:
 	std::vector<std::unique_ptr<std::thread>> v_thread_;
 	std::vector<std::shared_ptr<ClientSession>> client_sessions_;
 	SharedResources shared_resources_;
-	std::mutex mut_;
+	// mutex for client_sessions_
+	std::mutex mut_client_sessions_;
 
 	// Server methods
 	void close_server();

@@ -14,7 +14,7 @@ char SharedResources::check_and_add_logged_clients(const std::pair<int, std::str
 	#endif
 	{ // prefer std::lock_guard to ensure the lock is released if the execution
 		// throws any kind of exception
-		std::lock_guard<std::mutex> g(mut_, std::adopt_lock);
+		std::lock_guard<std::mutex> g(mut_logged_clients_, std::adopt_lock);
 		// Check if ID is in use
 		auto cli = std::find_if(logged_clients_.begin(), logged_clients_.end(),
 				[&recv](const std::pair<std::pair<int, std::string>, std::string>& r){
