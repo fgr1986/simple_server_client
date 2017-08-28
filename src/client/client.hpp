@@ -9,6 +9,7 @@ using Asio = boost::asio::ip::tcp;
 
 static const std::string PORT {"12345"};
 static const std::string IP_ADDR {"localhost"};
+static const std::vector<std::string> names_ {"Alice", "Bob", "Eve", "Mallory"};
 static const int U_SEC_SLEEP = 1;
 static const int SERVER_SIZE = 5;
 
@@ -22,21 +23,12 @@ public:
   int connect(void);
   int send(void);
   int receive(void);
-  void pr_ids(void);
-
 
 private:
   int server_size_;
-  std::vector<int> r_ids_;
-  std::vector<std::string> names_ {"Alice", "Bob", "Eve", "Mallory"};
   std::unique_ptr<Asio::tcp::socket> current_socket_;
-
   std::string port_;
   std::string ip_;
   std::chrono::duration<double, std::milli> t_lapse_;
-
-
-
-
 
 };

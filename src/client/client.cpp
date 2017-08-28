@@ -29,41 +29,28 @@ constexpr bool is_lvalue(T&&) noexcept
 	  return std::is_lvalue_reference<T>{};
 }
 
-void Client::pr_ids(void)
-{
-	std::cout << "Assigned ids for this Client are:" << std::endl;
-	for (const auto& i: r_ids_) {
-		std::cout << i << std::endl;
-	}
-}
-
 /*
  * Constructor para clientes:
  * @param size:  número de identificadores a guardar en el servido (tamaño de la tabla en el servidor)
  * @param port:  puerto de habilitado en el servidor
  * @param ip_addr: dirección IP del servidor
  */
-Client::Client(int size, std::string port_n, std::string ip_addr) : server_size_{size} ,  port_{port_n}, ip_{ip_addr}
+Client::Client(int size, std::string port_n, std::string ip_addr)
+	: server_size_{size} ,  port_{port_n}, ip_{ip_addr}
 {
-	// Initialize vectors with randomly assigned ids [1, 250], and names
-	r_ids_.reserve(server_size_);
-
-	auto generate_ids = [&id = r_ids_]() {
-		for (size_t i = 1; i <= id.capacity(); ++i) {
-			id.emplace_back(i);
-		}
-		auto engine = std::default_random_engine();
-
-		std::shuffle(id.begin(), id.end(), engine);
-	};
-
-	generate_ids();
-
-
-	for (std::vector<int>::size_type i = 0 ; i < r_ids_.size(); ++i ) {
-		p_insert_.emplace_back(std::make_pair(r_ids_[i], names_[i %
-						     names_.size()]));
-
+	// Initialize vectors with randomly assigned ids [1, size], and names
+	std::vector<int> r_ids(server_size_);
+	r_ids.reserve(server_size_); // not needed
+	// fill it
+	int n = 0;
+	std::generate(r_ids.begin(), r_ids.end(), [&n]() { return n++; });
+	// suffle it
+	auto engine = std::default_random_engine();
+	std::shuffle(r_ids.begin(), r_ids.end(), engine);
+	// generate pair
+	n = 0;
+	for ( const auto & id : r_ids ) {
+		p_insert_.emplace_back( std::make_pair(id, names_[n++ % names_.size()]));
 	}
 }
 
@@ -73,31 +60,26 @@ Client::Client(int size, std::string port_n, std::string ip_addr) : server_size_
  */
 int Client::connect(void)
 {
-	/* Prepare socket for connection to server */
+	// Prepare socket for connection to server
 	boost::asio::io_service io_service;
-
 	Asio::tcp::resolver resolver(io_service);
 
-	/* If a specific server IP has been given as input, use that.
-	 * Otherwise use localhost*/
+	// If a specific server IP has been given as input, use that.
+	// Otherwise use localhost
 	Asio::tcp::resolver::query query(port_);
-
 	Asio::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-	boost::system::error_code ec;
-
 	current_socket_.reset(new Asio::tcp::socket(io_service));
 
-	/* Connect to the server */
-	boost::asio::connect(*current_socket_, endpoint_iterator, ec);
-
-	if (ec == boost::asio::error::not_found) {
-		return 0;
-	}
-	else {
-		std::cerr << "An Error occurred when connecting to the server: " + ec.message() << std::endl;
+	// Connect to the server
+	boost::system::error_code error;
+	boost::asio::connect(*current_socket_, endpoint_iterator, error);
+	// check for errors in connection
+	if( error ){
+		std::cerr << "An Error occurred when connecting to the server: '"
+				<< error.message() << "'" << std::endl;
 		return -1;
 	}
+	return 0;
 }
 
 
