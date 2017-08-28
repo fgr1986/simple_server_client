@@ -13,7 +13,7 @@ void client_thread(void)
 {
 	Client client;
 
-	if(client.connect()) {
+	if(client.connect() == 0) { // No errors
 		client.send();
 	}
 	else {
