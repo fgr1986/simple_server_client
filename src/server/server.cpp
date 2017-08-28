@@ -93,9 +93,13 @@ void Server::add_client_session( const std::shared_ptr<ClientSession>&& cs )
 	#ifdef DEBUG
 	std::cout << "[Server]\templace_back ClientSession:" << cs << "\n";
 	#endif
-	// prefer std::lock_guard to ensure the lock is released if the execution
+	// 1) if different mutex could be blocked from outside threads leading to
+	// a deadlock, use:
+	// 'std::lock( mut_logged_clients_, m2, m3, ...)'
+	//
+	// 2) prefer 'std::lock_guard' to ensure the lock is released if the execution
 	// throws any kind of exception
-	std::lock_guard<std::mutex> g(mut_);
+	std::lock_guard<std::mutex> g(mut_client_sessions_, std::adopt_lock);
 	client_sessions_.emplace_back( cs );
 }
 void Server::restart_handler( const std::shared_ptr<boost::asio::deadline_timer>&& timer )
