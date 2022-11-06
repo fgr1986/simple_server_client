@@ -14,7 +14,12 @@ VERSION=v0.2
 #################
 # Compiler def  #
 #################
-CC=g++
+COMPILER_PATH="/opt/homebrew/Cellar/gcc/12.2.0/"
+COMPILER_BIN_PATH="/opt/homebrew/Cellar/gcc/12.2.0/bin/"
+CC=$(COMPILER_BIN_PATH)gcc-12
+CPP=$(COMPILER_BIN_PATH)g++-12
+LD=$(COMPILER_BIN_PATH)g++-12
+# llvm-gcc
 
 #################
 # Gcc flags     #
@@ -55,28 +60,77 @@ CPPFLAGS+= -std=c++14 -O3 -g -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 
 # LDFLAGS= -L/usr/lib -lboost_thread -lboost_regex -lboost_filesystem -lboost_system -lpthread
 # only boost:asio
-LDFLAGS= -L/usr/lib -lboost_system -lpthread
+LDFLAGS= -L/usr/lib
+LDFLAGS += -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+LDFLAGS +=-L/opt/homebrew/Cellar/boost/1.80.0/lib
+LDFLAGS +=-lboost_system -lpthread
+LDFLAGS += -lm -ldl
 
-SRC:= $(wildcard *.cpp)
+
+#  LIBRARY_PATHS  = -L/opt/homebrew/Cellar/boost/1.80.0/lib
+#  LIBRARY_PATHS += -L/usr/lib
+#  LIBRARY_PATHS += -L/usr/lib/system
+
+CPP_FILES:= $(wildcard *.cpp)
 # if client is integrated
 # SRC+= $(wildcard server/*.cpp)
-OBJECTS= $(SRC:.cpp=.o)
+# Strip dirs to create object names
+C_FILE_NAMES = $(notdir $(C_FILES))
+C_PATHS = $(dir $(C_FILES) )
+C_OBJECTS = $(addprefix $(BUILD_DIR)/, $(C_FILE_NAMES:.c=.o) )
+
+CPP_FILE_NAMES = $(notdir $(CPP_FILES))
+CPP_PATHS = $(dir $(CPP_FILES) )
+CPP_OBJECTS = $(addprefix $(BUILD_DIR)/, $(CPP_FILE_NAMES:.cpp=.o) )
+
+ASM_FILE_NAMES = $(notdir $(ASM_FILES))
+ASM_PATHS = $(dir $(ASM_FILES) )
+ASM_OBJECTS = $(addprefix $(BUILD_DIR)/, $(ASM_FILE_NAMES:.S=.o) )
+
+vpath %.c $(C_PATHS)
+vpath %.cpp $(CPP_PATHS)
+vpath %.S $(ASM_PATHS)
+
+PROJECT_OBJECTS = $(C_OBJECTS) $(CPP_OBJECTS) $(ASM_OBJECTS)
+
+
+
 EXECUTABLE=server
 EXECDIR=../../bin/
-IDIR=../include
+BUILD_DIR=build
 
-all: ${EXECUTABLE}
+INCLUDE_PATHS  = -I../include
+INCLUDE_PATHS  += -I/opt/homebrew/Cellar/boost/1.80.0/include
+# INCLUDE_PATHS  += -I/opt/homebrew/Cellar/boost/1.80.0/include/boost/thread
 
-$(EXECUTABLE): $(OBJECTS)
-	    $(CC) $(OBJECTS) -o $(EXECDIR)$(EXECUTABLE) $(LDFLAGS)
-#     g++ -c -o AnnealControl.o -lboost_thread AnnealControl.cpp
+all: build ${EXECUTABLE}
+
+build:
+	mkdir -p "$(BUILD_DIR)"
+
+
+$(BUILD_DIR)/%.o: %.c
+	$(V)echo Compiling file: $(notdir $<)
+	$(V)$(CC) $(CCFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
+$(BUILD_DIR)/%.o: %.cpp
+	$(V)echo Compiling file using ++: $(notdir $<)
+	$(V)$(CPP) $(CCFLAGS) $(CPPFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
+$(EXECUTABLE): $(PROJECT_OBJECTS)
+	echo $(LD)
+	echo $(CC)
+	$(V)echo Linking target: $@
+	$(V)$(LD) $(LDFLAGS) $(PROJECT_OBJECTS) -lm -o $(EXECDIR)$(EXECUTABLE)
+	# $(V)echo Disassembling target: $@
+	# $(V)$(OBJDUMP) -d $(BUILD_DIR)/$@ > $(BUILD_DIR)/$(BUILD_TARGET).s
 
 #
 # Cleanning up
 #
 clean:
 	@echo "Cleaning up..."
-	rm -f *.o *~
+	rm -f build/*.o *.o *~
 
 #
 # RUN
